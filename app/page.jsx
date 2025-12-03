@@ -131,8 +131,8 @@ export default function HomePage() {
   };
 
   const analyzeImage = async () => {
-    // Check if at least one API is selected
-    if (!selectedAPIs.gemini && !selectedAPIs.sightengine && !selectedAPIs.clarifai) {
+    // Check if at least one API is selected (only Sightengine and Clarifai available in UI)
+    if (!selectedAPIs.sightengine && !selectedAPIs.clarifai) {
       alert('Kindly check any option to proceed with analysis');
       return;
     }
@@ -160,11 +160,10 @@ export default function HomePage() {
       const formData = new FormData();
       formData.append("file", imageFile);
 
-      // Count selected APIs
-      const totalAPIs = (selectedAPIs.gemini ? 1 : 0) + 
-                       (selectedAPIs.sightengine ? 1 : 0) + 
+      // Count selected APIs (only Sightengine and Clarifai available in UI)
+      const totalAPIs = (selectedAPIs.sightengine ? 1 : 0) + 
                        (selectedAPIs.clarifai ? 1 : 0);
-
+      
       // Only call selected APIs with progress tracking
       const progressIncrement = 90 / totalAPIs; // 90% for APIs, 10% for initial
       setProgress(10);
@@ -188,18 +187,6 @@ export default function HomePage() {
 
       // Create promises with progress tracking
       const apiPromises = [];
-      
-      if (selectedAPIs.gemini) {
-        apiPromises.push(
-          fetch("/api/gemini", { method: "POST", body: formData })
-            .then(async (response) => {
-              setProgress(prev => Math.min(prev + progressIncrement, 90));
-              const data = await parseResponse(response, "Gemini");
-              setProgress(prev => Math.min(prev + progressIncrement, 90));
-              return { key: 'gemini', data };
-            })
-        );
-      }
       if (selectedAPIs.sightengine) {
         apiPromises.push(
           fetch("/api/sightengine", { method: "POST", body: formData })
@@ -250,9 +237,9 @@ export default function HomePage() {
   };
 
   const handleSelectAll = () => {
-    const allSelected = selectedAPIs.gemini && selectedAPIs.sightengine && selectedAPIs.clarifai;
+    const allSelected = selectedAPIs.sightengine && selectedAPIs.clarifai;
     setSelectedAPIs({
-      gemini: !allSelected,
+      gemini: false, // Keep Gemini disabled in UI
       sightengine: !allSelected,
       clarifai: !allSelected,
     });
@@ -353,7 +340,7 @@ export default function HomePage() {
             <div className="p-1.5 rounded bg-gray-200">
               <Sparkles className="h-4 w-4 text-gray-700" />
             </div>
-            AI Analysis
+            Gemini AI Detection
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -484,17 +471,97 @@ export default function HomePage() {
     if (!data || data.error) return null;
     const seData = data.data || data;
     
+    // Extract AI detection data
+    const isAI = seData.isAI;
+    const aiConfidence = seData.aiConfidence;
+    const description = seData.description || '';
+    const fullAnalysis = seData.fullAnalysis || '';
+    
     return (
-      <Card className="border border-gray-200 bg-gray-50">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
-            <div className="p-1.5 rounded bg-gray-200">
-              <Shield className="h-4 w-4 text-gray-700" />
-            </div>
-            Content Safety
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* AI Detection Section */}
+        {isAI !== null && (
+          <Card className="border border-gray-200 bg-gray-50">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
+                <div className="p-1.5 rounded bg-gray-200">
+                  <Sparkles className="h-4 w-4 text-gray-700" />
+                </div>
+                Sightengine AI Detection
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-semibold text-gray-700">Detection Result</span>
+                  <Badge 
+                    className={`font-semibold text-xs ${
+                      isAI 
+                        ? 'bg-red-500 text-white border-red-600 hover:bg-red-600' 
+                        : 'bg-green-500 text-white border-green-600 hover:bg-green-600'
+                    }`}
+                  >
+                    {isAI ? 'AI Generated' : 'Real Photo'}
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs text-gray-600">Confidence</span>
+                      <span className="text-xs font-medium text-gray-700">
+                        {formatPercent(aiConfidence)}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all ${
+                          isAI ? 'bg-red-500' : 'bg-green-500'
+                        }`}
+                        style={{ width: `${(aiConfidence * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  {description && (
+                    <p className="text-sm text-gray-600 mt-3">{description}</p>
+                  )}
+                  {fullAnalysis && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="w-full mt-2">
+                          <FileText className="h-3 w-3 mr-2" />
+                          Read Full Analysis Report
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Complete AI Detection Analysis Report</DialogTitle>
+                          <DialogDescription>
+                            Detailed analysis from Sightengine AI detection model
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed">
+                          {fullAnalysis}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Content Safety Section */}
+        <Card className="border border-gray-200 bg-gray-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
+              <div className="p-1.5 rounded bg-gray-200">
+                <Shield className="h-4 w-4 text-gray-700" />
+              </div>
+              Content Safety
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
           {seData.nudity && (
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-gray-700">
@@ -537,8 +604,9 @@ export default function HomePage() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     );
   };
 
@@ -768,7 +836,7 @@ export default function HomePage() {
               <div className="flex items-center space-x-2 pb-3 border-b">
                 <Checkbox
                   id="select-all"
-                  checked={selectedAPIs.gemini && selectedAPIs.sightengine && selectedAPIs.clarifai}
+                  checked={selectedAPIs.sightengine && selectedAPIs.clarifai}
                   onCheckedChange={handleSelectAll}
                 />
                 <label
@@ -779,28 +847,7 @@ export default function HomePage() {
                 </label>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                  <Checkbox
-                    id="gemini"
-                    checked={selectedAPIs.gemini}
-                    onCheckedChange={(checked) =>
-                      setSelectedAPIs({ ...selectedAPIs, gemini: checked })
-                    }
-                  />
-                  <div className="flex-1">
-                    <label
-                      htmlFor="gemini"
-                      className="text-sm font-semibold text-gray-900 cursor-pointer block mb-1"
-                    >
-                      AI Detection
-                    </label>
-                    <p className="text-xs text-gray-600">
-                      Detect if image is AI-generated or real, with detailed analysis
-                    </p>
-                  </div>
-                </div>
-
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
                   <Checkbox
                     id="sightengine"
@@ -814,10 +861,10 @@ export default function HomePage() {
                       htmlFor="sightengine"
                       className="text-sm font-semibold text-gray-900 cursor-pointer block mb-1"
                     >
-                      Nudity Check
+                      AI Detection & Content Safety
                     </label>
                     <p className="text-xs text-gray-600">
-                      Content safety analysis including nudity and offensive content detection
+                      Detect if image is AI-generated (high accuracy) and check for nudity/offensive content
                     </p>
                   </div>
                 </div>
@@ -849,8 +896,7 @@ export default function HomePage() {
                   onClick={analyzeImage}
                   className="w-full"
                   size="lg"
-                  disabled={!selectedAPIs.gemini && !selectedAPIs.sightengine && !selectedAPIs.clarifai}
-                  disabled={!selectedAPIs.gemini && !selectedAPIs.sightengine && !selectedAPIs.clarifai}
+                  disabled={!selectedAPIs.sightengine && !selectedAPIs.clarifai}
                 >
                   <Zap className="h-4 w-4 mr-2" />
                   Start Analysis
@@ -917,19 +963,14 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {result.gemini && (
-                <div className="md:col-span-2 lg:col-span-1">
-                  {renderGeminiResults(result.gemini)}
-                </div>
-              )}
+            <div className="space-y-6">
               {result.sightengine && (
-                <div className="md:col-span-1">
+                <div>
                   {renderSightengineResults(result.sightengine)}
                 </div>
               )}
               {result.clarifai && (
-                <div className="md:col-span-2 lg:col-span-1">
+                <div>
                   {renderClarifaiResults(result.clarifai)}
                 </div>
               )}
@@ -978,7 +1019,7 @@ export default function HomePage() {
                 </Badge>
                 <h3 className="text-xl font-bold mb-3 text-gray-900">AI Analysis</h3>
                 <p className="text-gray-600 leading-relaxed text-sm">
-                  Our AI-powered engine analyzes your image using multiple detection models including Gemini, Sightengine, and Clarifai in real-time.
+                  Our AI-powered engine analyzes your image using multiple detection models including Sightengine and Clarifai in real-time.
                 </p>
               </CardContent>
             </Card>

@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Sparkles, Shield, Tag, Code, BookOpen, CheckCircle2, 
+  Shield, Tag, Code, BookOpen, CheckCircle2, 
   AlertCircle, FileText, Key, Globe, Zap
 } from "lucide-react";
 
@@ -22,12 +22,8 @@ export default function APIsPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="gemini" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="gemini" className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" />
-              Gemini
-            </TabsTrigger>
+        <Tabs defaultValue="sightengine" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="sightengine" className="flex items-center gap-2">
               <Shield className="h-4 w-4" />
               Sightengine
@@ -37,119 +33,6 @@ export default function APIsPage() {
               Clarifai
             </TabsTrigger>
           </TabsList>
-
-          {/* Gemini API Documentation */}
-          <TabsContent value="gemini" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Sparkles className="h-6 w-6 text-blue-600" />
-                    <CardTitle>Google Gemini API</CardTitle>
-                  </div>
-                  <Badge variant="outline" className="bg-blue-50">Free Tier Available</Badge>
-                </div>
-                <CardDescription>
-                  Advanced AI image analysis and understanding powered by Google's Gemini models
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <Key className="h-4 w-4" />
-                    Setup & Authentication
-                  </h3>
-                  <div className="bg-muted p-4 rounded-lg space-y-2">
-                    <p className="text-sm"><strong>1. Get API Key:</strong></p>
-                    <p className="text-sm text-muted-foreground">
-                      Visit <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google AI Studio</a> and create a free API key
-                    </p>
-                    <p className="text-sm mt-3"><strong>2. Add to Environment:</strong></p>
-                    <pre className="bg-background p-3 rounded text-xs overflow-x-auto">
-{`GEMINI_API_KEY=your_api_key_here`}
-                    </pre>
-                    <p className="text-sm mt-3"><strong>Free Tier:</strong> 60 requests per minute</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <Code className="h-4 w-4" />
-                    API Endpoint
-                  </h3>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <p className="text-sm font-mono mb-2">POST /api/gemini</p>
-                    <p className="text-sm text-muted-foreground">
-                      Accepts multipart/form-data with an image file
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Request Format
-                  </h3>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <pre className="text-xs overflow-x-auto">
-{`FormData:
-  file: <image file>
-
-Supported formats:
-  - JPEG
-  - PNG
-  - WebP
-  - GIF`}
-                    </pre>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4" />
-                    Response Format
-                  </h3>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <pre className="text-xs overflow-x-auto">
-{`{
-  "success": true,
-  "data": {
-    "fullAnalysis": "Comprehensive text analysis of the image...",
-    "model": "v1beta/gemini-1.5-flash",
-    "timestamp": "2024-01-01T00:00:00.000Z"
-  }
-}`}
-                    </pre>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-3 flex items-center gap-2">
-                    <Zap className="h-4 w-4" />
-                    Features
-                  </h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Comprehensive image description and analysis</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Object, people, and text identification</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Content type assessment</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Safety and appropriateness evaluation</span>
-                    </li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Sightengine API Documentation */}
           <TabsContent value="sightengine" className="space-y-6">
@@ -163,7 +46,7 @@ Supported formats:
                   <Badge variant="outline" className="bg-green-50">Content Moderation</Badge>
                 </div>
                 <CardDescription>
-                  Professional content moderation and safety detection for images
+                  AI detection and content moderation with high accuracy for images
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -206,8 +89,14 @@ SIGHTENGINE_SECRET=your_secret_key`}
                   <div className="bg-muted p-4 rounded-lg">
                     <pre className="text-xs overflow-x-auto">
 {`{
-  "success": true,
+  "model": "sightengine",
   "data": {
+    "isAI": true,
+    "aiConfidence": 0.99,
+    "description": "This image is likely AI-generated...",
+    "type": {
+      "ai_generated": 0.99
+    },
     "nudity": {
       "raw": 0.01,
       "partial": 0.02,
@@ -215,8 +104,7 @@ SIGHTENGINE_SECRET=your_secret_key`}
     },
     "offensive": {
       "prob": 0.05
-    },
-    "faces": [...]
+    }
   }
 }`}
                     </pre>
@@ -231,19 +119,19 @@ SIGHTENGINE_SECRET=your_secret_key`}
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Nudity detection (raw, partial, safe)</span>
+                      <span><strong>AI Detection:</strong> High-accuracy detection of AI-generated images (0.0-1.0 score)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Offensive content detection</span>
+                      <span><strong>Content Safety:</strong> Nudity detection (raw, partial, safe)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Face detection and attributes</span>
+                      <span><strong>Offensive Content:</strong> Detection of offensive or inappropriate content</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                      <span>Weapon and text detection</span>
+                      <span><strong>Face Detection:</strong> Face detection and attributes analysis</span>
                     </li>
                   </ul>
                 </div>
@@ -373,13 +261,22 @@ CLARIFAI_APP_ID=main        # Optional, defaults to "main"`}
 const formData = new FormData();
 formData.append('file', imageFile);
 
-const response = await fetch('/api/gemini', {
+// Sightengine API - AI Detection & Content Safety
+const sightengineResponse = await fetch('/api/sightengine', {
   method: 'POST',
   body: formData
 });
+const sightengineData = await sightengineResponse.json();
 
-const data = await response.json();
-console.log(data);`}
+// Clarifai API - Image Recognition
+const clarifaiResponse = await fetch('/api/clarifai', {
+  method: 'POST',
+  body: formData
+});
+const clarifaiData = await clarifaiResponse.json();
+
+console.log('AI Detection:', sightengineData);
+console.log('Image Recognition:', clarifaiData);`}
               </pre>
             </div>
           </CardContent>
