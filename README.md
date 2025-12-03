@@ -1,8 +1,38 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Features
+
+- **Next.js 16** with App Router
+- **Tailwind CSS v4** for styling
+- **shadcn/ui** components for professional UI
+- **lucide-react** icons
+- AI Image Detection using multiple APIs:
+  - Google Gemini (comprehensive image analysis)
+  - Sightengine (content moderation)
+  - Clarifai (image recognition)
+
 ## Getting Started
 
-First, run the development server:
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+# Google Gemini API (Free tier: 60 requests/minute)
+# Get your API key from: https://aistudio.google.com/
+GEMINI_API_KEY=your_gemini_api_key
+
+# Sightengine API
+SIGHTENGINE_USER=your_sightengine_user
+SIGHTENGINE_SECRET=your_sightengine_secret
+
+# Clarifai API
+CLARIFAI_API_KEY=your_clarifai_api_key
+CLARIFAI_USER_ID=your_clarifai_user_id  # Optional, defaults to "clarifai"
+CLARIFAI_APP_ID=your_clarifai_app_id    # Optional, defaults to "main"
+```
+
+### Run the development server:
 
 ```bash
 npm run dev
