@@ -828,21 +828,25 @@ export default function HomePage() {
               <p className="text-sm font-semibold text-gray-700 mb-3">
                 Top {Math.min(10, concepts.length)} Detected Concepts
               </p>
-              <div className="grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {concepts.slice(0, 10).map((concept, idx) => (
                   <div 
                     key={idx} 
-                    className="flex justify-between items-center p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="flex flex-col p-3 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 hover:shadow-sm transition-all"
                   >
-                    <span className="text-sm font-medium text-gray-700 capitalize">{concept.name}</span>
-                    <div className="flex items-center gap-3">
-                      <div className="w-24 bg-gray-200 rounded-full h-1.5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-gray-700 capitalize truncate flex-1" title={concept.name}>
+                        {concept.name}
+                      </span>
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
                         <div 
                           className="bg-gray-600 h-1.5 rounded-full transition-all"
                           style={{ width: `${concept.value * 100}%` }}
                         />
                       </div>
-                      <Badge variant="outline" className="font-semibold text-xs min-w-[3.5rem] justify-end bg-gray-50 text-gray-700 border-gray-300">
+                      <Badge variant="outline" className="font-semibold text-xs w-full justify-center bg-gray-50 text-gray-700 border-gray-300">
                         {formatPercent(concept.value)}
                       </Badge>
                     </div>
