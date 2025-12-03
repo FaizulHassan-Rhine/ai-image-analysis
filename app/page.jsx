@@ -276,7 +276,188 @@ export default function HomePage() {
   };
 
   const formatPercent = (value) => {
+    if (value === null || value === undefined || isNaN(value)) {
+      return '0.0%';
+    }
     return `${(value * 100).toFixed(1)}%`;
+  };
+
+  const renderDetectedTags = (seData) => {
+    const detectedTags = [];
+    const threshold = 0.1; // Minimum confidence to show a tag
+
+    // AI Detection
+    if (seData.type?.ai_generated !== undefined && seData.type.ai_generated > threshold) {
+      detectedTags.push({
+        name: 'AI Generated',
+        value: seData.type.ai_generated,
+        category: 'Type',
+        color: 'red'
+      });
+    }
+
+    // Nudity
+    if (seData.nudity) {
+      if (seData.nudity.raw > threshold) {
+        detectedTags.push({ name: 'Raw Nudity', value: seData.nudity.raw, category: 'Content Safety', color: 'red' });
+      }
+      if (seData.nudity.partial > threshold) {
+        detectedTags.push({ name: 'Partial Nudity', value: seData.nudity.partial, category: 'Content Safety', color: 'red' });
+      }
+    }
+
+    // Offensive
+    if (seData.offensive?.prob > threshold) {
+      detectedTags.push({ name: 'Offensive Content', value: seData.offensive.prob, category: 'Content Safety', color: 'red' });
+    }
+
+    // Weapon
+    if (seData.weapon?.prob > threshold) {
+      detectedTags.push({ name: 'Weapon', value: seData.weapon.prob, category: 'Safety', color: 'red' });
+    }
+
+    // Alcohol
+    if (seData.alcohol?.prob > threshold) {
+      detectedTags.push({ name: 'Alcohol', value: seData.alcohol.prob, category: 'Substances', color: 'orange' });
+    }
+
+    // Recreational Drug
+    if (seData.recreational_drug?.prob > threshold) {
+      detectedTags.push({ name: 'Recreational Drug', value: seData.recreational_drug.prob, category: 'Substances', color: 'red' });
+    }
+
+    // Medical
+    if (seData.medical?.prob > threshold) {
+      detectedTags.push({ name: 'Medical Content', value: seData.medical.prob, category: 'Content', color: 'blue' });
+    }
+
+    // Tobacco
+    if (seData.tobacco?.prob > threshold) {
+      detectedTags.push({ name: 'Tobacco', value: seData.tobacco.prob, category: 'Substances', color: 'orange' });
+    }
+
+    // Violence
+    if (seData.violence?.prob > threshold) {
+      detectedTags.push({ name: 'Violence', value: seData.violence.prob, category: 'Safety', color: 'red' });
+    }
+
+    // Self-harm
+    if (seData['self-harm']?.prob > threshold) {
+      detectedTags.push({ name: 'Self-harm', value: seData['self-harm'].prob, category: 'Safety', color: 'red' });
+    }
+
+    // Gore
+    if (seData.gore?.prob > threshold) {
+      detectedTags.push({ name: 'Gore', value: seData.gore.prob, category: 'Content Safety', color: 'red' });
+    }
+
+    // Money
+    if (seData.money?.prob > threshold) {
+      detectedTags.push({ name: 'Money', value: seData.money.prob, category: 'Objects', color: 'green' });
+    }
+
+    // Gambling
+    if (seData.gambling?.prob > threshold) {
+      detectedTags.push({ name: 'Gambling', value: seData.gambling.prob, category: 'Content', color: 'orange' });
+    }
+
+    // Text Content
+    if (seData['text-content']?.detected === true) {
+      detectedTags.push({ name: 'Text Content', value: 1.0, category: 'Content', color: 'blue' });
+    }
+
+    // QR Content
+    if (seData['qr-content']?.detected === true) {
+      detectedTags.push({ name: 'QR Code', value: 1.0, category: 'Content', color: 'blue' });
+    }
+
+    // Faces
+    if (seData.faces && seData.faces.length > 0) {
+      detectedTags.push({ name: `Face${seData.faces.length > 1 ? 's' : ''} Detected`, value: seData.faces.length / 10, category: 'People', color: 'blue' });
+    }
+
+    // People Counting
+    if (seData['people-counting']?.count !== undefined && seData['people-counting'].count > 0) {
+      detectedTags.push({ name: `${seData['people-counting'].count} Person${seData['people-counting'].count > 1 ? 's' : ''}`, value: Math.min(seData['people-counting'].count / 10, 1), category: 'People', color: 'blue' });
+    }
+
+    // Image Properties
+    if (seData.properties) {
+      if (seData.properties.width && seData.properties.height) {
+        detectedTags.push({ name: `${seData.properties.width}x${seData.properties.height}`, value: 1.0, category: 'Properties', color: 'gray' });
+      }
+    }
+
+    // Image Type
+    if (seData.type?.illustration > threshold) {
+      detectedTags.push({ name: 'Illustration', value: seData.type.illustration, category: 'Type', color: 'purple' });
+    }
+    if (seData.type?.photo > threshold) {
+      detectedTags.push({ name: 'Photo', value: seData.type.photo, category: 'Type', color: 'blue' });
+    }
+
+    // Image Quality
+    if (seData.quality) {
+      if (seData.quality.brightness > 0.7) {
+        detectedTags.push({ name: 'Bright', value: seData.quality.brightness, category: 'Quality', color: 'yellow' });
+      }
+      if (seData.quality.sharpness > 0.7) {
+        detectedTags.push({ name: 'Sharp', value: seData.quality.sharpness, category: 'Quality', color: 'green' });
+      }
+    }
+
+    if (detectedTags.length === 0) {
+      return (
+        <div className="text-center py-6 text-sm text-gray-500">
+          No significant tags detected above threshold
+        </div>
+      );
+    }
+
+    // Group by category
+    const groupedTags = detectedTags.reduce((acc, tag) => {
+      if (!acc[tag.category]) {
+        acc[tag.category] = [];
+      }
+      acc[tag.category].push(tag);
+      return acc;
+    }, {});
+
+    const getColorClasses = (color) => {
+      const colors = {
+        red: 'bg-red-50 border-red-200 text-red-700',
+        orange: 'bg-orange-50 border-orange-200 text-orange-700',
+        yellow: 'bg-yellow-50 border-yellow-200 text-yellow-700',
+        green: 'bg-green-50 border-green-200 text-green-700',
+        blue: 'bg-blue-50 border-blue-200 text-blue-700',
+        purple: 'bg-purple-50 border-purple-200 text-purple-700',
+        gray: 'bg-gray-50 border-gray-200 text-gray-700',
+      };
+      return colors[color] || colors.gray;
+    };
+
+    return (
+      <div className="space-y-4">
+        {Object.entries(groupedTags).map(([category, tags]) => (
+          <div key={category} className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-semibold mb-3 text-sm text-gray-700">{category}</h4>
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag, idx) => (
+                <div
+                  key={idx}
+                  className={`px-3 py-1.5 rounded-lg border ${getColorClasses(tag.color)} flex items-center gap-2`}
+                >
+                  <span className="text-xs font-medium">{tag.name}</span>
+                  <Badge variant="outline" className="text-xs bg-white/50 border-current">
+                    {formatPercent(tag.value)}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const renderGeminiResults = (data) => {
@@ -562,48 +743,64 @@ export default function HomePage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-          {seData.nudity && (
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-gray-700">
-                <Lock className="h-4 w-4 text-gray-600" />
-                Safety Metrics
-              </h4>
-              <div className="space-y-2.5">
-                <div className="flex justify-between items-center p-2.5 rounded-lg bg-green-50 border border-green-200">
-                  <span className="text-sm font-medium text-gray-700">Safe Content</span>
-                  <Badge className="font-semibold text-xs bg-green-500 text-white border-green-600 hover:bg-green-600">
-                    {formatPercent(seData.nudity.safe)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center p-2.5 rounded-lg bg-red-50 border border-red-200">
-                  <span className="text-sm font-medium text-gray-700">Raw Nudity</span>
-                  <Badge className="font-semibold text-xs bg-red-500 text-white border-red-600 hover:bg-red-600">
-                    {formatPercent(seData.nudity.raw)}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center p-2.5 rounded-lg bg-red-50 border border-red-200">
-                  <span className="text-sm font-medium text-gray-700">Partial Nudity</span>
-                  <Badge className="font-semibold text-xs bg-red-500 text-white border-red-600 hover:bg-red-600">
-                    {formatPercent(seData.nudity.partial)}
-                  </Badge>
-                </div>
+          {/* Safety Metrics - Always show */}
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-gray-700">
+              <Lock className="h-4 w-4 text-gray-600" />
+              Safety Metrics
+            </h4>
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-green-50 border border-green-200">
+                <span className="text-sm font-medium text-gray-700">Safe Content</span>
+                <Badge className="font-semibold text-xs bg-green-500 text-white border-green-600 hover:bg-green-600">
+                  {formatPercent(seData.nudity?.safe ?? 0)}
+                </Badge>
               </div>
-            </div>
-          )}
-          {seData.offensive && (
-            <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-gray-700">
-                <AlertCircle className="h-4 w-4 text-gray-600" />
-                Offensive Content
-              </h4>
-              <div className="flex justify-between items-center p-2.5 rounded-lg bg-gray-50 border border-gray-200">
-                <span className="text-sm font-medium text-gray-700">Offensive Probability</span>
-                <Badge variant={seData.offensive.prob > 0.1 ? "destructive" : "outline"} className="font-semibold text-xs">
-                  {formatPercent(seData.offensive.prob)}
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-red-50 border border-red-200">
+                <span className="text-sm font-medium text-gray-700">Raw Nudity</span>
+                <Badge className="font-semibold text-xs bg-red-500 text-white border-red-600 hover:bg-red-600">
+                  {formatPercent(seData.nudity?.raw ?? 0)}
+                </Badge>
+              </div>
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-red-50 border border-red-200">
+                <span className="text-sm font-medium text-gray-700">Partial Nudity</span>
+                <Badge className="font-semibold text-xs bg-red-500 text-white border-red-600 hover:bg-red-600">
+                  {formatPercent(seData.nudity?.partial ?? 0)}
                 </Badge>
               </div>
             </div>
-          )}
+          </div>
+          
+          {/* Offensive Content - Always show */}
+          <div className="bg-white rounded-lg p-4 border border-gray-200">
+            <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-gray-700">
+              <AlertCircle className="h-4 w-4 text-gray-600" />
+              Offensive Content
+            </h4>
+            <div className="flex justify-between items-center p-2.5 rounded-lg bg-gray-50 border border-gray-200">
+              <span className="text-sm font-medium text-gray-700">Offensive Probability</span>
+              <Badge variant={(seData.offensive?.prob ?? 0) > 0.1 ? "destructive" : "outline"} className="font-semibold text-xs">
+                {formatPercent(seData.offensive?.prob ?? 0)}
+              </Badge>
+            </div>
+          </div>
+          </CardContent>
+        </Card>
+        
+        {/* Detected Tags & Categories Section */}
+        <Card className="border border-gray-200 bg-gray-50">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
+              <div className="p-1.5 rounded bg-gray-200">
+                <Tag className="h-4 w-4 text-gray-700" />
+              </div>
+              Detected Tags & Categories
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {renderDetectedTags(seData)}
+            </div>
           </CardContent>
         </Card>
       </div>
